@@ -9,7 +9,7 @@ class ComponentException(Exception):
     pass
 
 
-class AbstractComponent(metaclass=ABC):
+class AbstractComponent(ABC):
 
     def __init__(self, globalConfig):
         self.__globalConfig = globalConfig

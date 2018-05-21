@@ -20,21 +20,24 @@ class Engine:
             componentInstance = componentClass()
             self.__components[name] = componentInstance
 
-    def __component(self, func):
-        def execute(*args, **kargs):
-            name = args[1]
-            if not self.__config.has_section("component.%s" % name):
-                raise EngineException("The component [%s] not configured in the configuration file [%s]" % (
-                    name, self.__configFilePath))
-            if self.__components.get(name) is None:
-                raise EngineException("The component [%s] not exist, fail to build." % name)
-            try:
-                func(*args, **kargs)
-            except ComponentException as e:
-                print("Fail to execute [%s] on component [%s] because of exception [%s]." % (
-                    func.__name__, name, str(e)))
+    def __component(self):
+        def wrapper(func):
+            def execute(*args, **kargs):
+                name = args[1]
+                if not self.__config.has_section("component.%s" % name):
+                    raise EngineException("The component [%s] not configured in the configuration file [%s]" % (
+                        name, self.__configFilePath))
+                if self.__components.get(name) is None:
+                    raise EngineException("The component [%s] not exist, fail to build." % name)
+                try:
+                    func(*args, **kargs)
+                except ComponentException as e:
+                    print("Fail to execute [%s] on component [%s] because of exception [%s]." % (
+                        func.__name__, name, str(e)))
 
-        return execute
+            return execute
+
+        return wrapper
 
     @__component
     def build(self, name):
