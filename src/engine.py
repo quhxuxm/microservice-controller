@@ -13,7 +13,6 @@ class EngineException(Exception):
     pass
 
 
-@Singleton
 class EngineExecutor:
     def __init__(self, func):
         self.__func = func
