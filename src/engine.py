@@ -1,62 +1,56 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from configparser import ConfigParser
 
-from src.component import ComponentException
+
+import importlib
+
+import const
+from util import Singleton, ConfigurationHolder
 
 
 class EngineException(Exception):
     pass
 
 
+@Singleton
 class Engine:
-    def __init__(self, configFilePath):
-        self.__config = ConfigParser()
-        self.__configFilePath = configFilePath
-        self.__config.read(configFilePath, encoding="UTF-8")
+
+    def __init__(self):
         self.__components = {}
-        for name in self.__config.sections():
-            componentClass = __import__("component.%s.Component" % name)
-            componentInstance = componentClass()
-            self.__components[name] = componentInstance
+        configuration = ConfigurationHolder(const.GLOBAL_CONFIG_FILE_PATH).configuration
+        for name in configuration.sections():
+            if not name.startswith(const.COMPONENT_MODULE_PACKAGE_NAME):
+                continue
+            short_name = name[len(const.COMPONENT_MODULE_PACKAGE_NAME) + 1:]
+            component_module = importlib.import_module(name)
+            try:
+                component_instance = component_module.Component(configuration)
+                self.__components[short_name] = component_instance
+            except Exception as e:
+                print(e)
 
-    def __component(self):
-        def wrapper(func):
-            def execute(*args, **kargs):
-                name = args[1]
-                if not self.__config.has_section("component.%s" % name):
-                    raise EngineException("The component [%s] not configured in the configuration file [%s]" % (
-                        name, self.__configFilePath))
-                if self.__components.get(name) is None:
-                    raise EngineException("The component [%s] not exist, fail to build." % name)
-                try:
-                    func(*args, **kargs)
-                except ComponentException as e:
-                    print("Fail to execute [%s] on component [%s] because of exception [%s]." % (
-                        func.__name__, name, str(e)))
+    def __verify_component(self, name):
+        if name not in self.__components:
+            raise EngineException("The component [%s] not exist, fail to build." % name)
 
-            return execute
-
-        return wrapper
-
-    @__component
     def build(self, name):
+        self.__verify_component(name)
         self.__components[name].build()
 
-    @__component
     def deploy(self, name):
+        self.__verify_component(name)
         self.__components[name].deploy()
 
-    @__component
     def config(self, name):
+        self.__verify_component(name)
         self.__components[name].config()
 
-    @__component
     def start(self, name):
+        self.__verify_component(name)
         self.__components[name].start()
 
-    @__component
     def stop(self, name):
+        self.__verify_component(name)
         self.__components[name].stop()
 
     @property

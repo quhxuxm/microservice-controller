@@ -1,9 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from src.component import AbstractComponent
+from component import AbstractComponent
 
 
 class Component(AbstractComponent):
+    def info(self):
+        pass
+
+    def deploy(self):
+        pass
+
     def build(self):
         print("Start to build RGS.")
 

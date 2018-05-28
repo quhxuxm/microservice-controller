@@ -4,6 +4,16 @@ from src.component import AbstractComponent
 
 
 class Component(AbstractComponent):
+    def info(self):
+        pass
+
+    def deploy(self):
+        pass
+
+    @property
+    def name(self):
+        return "uid"
+
     def build(self):
         pass
 
