@@ -5,6 +5,8 @@ from abc import abstractmethod
 
 from P4 import P4
 
+import const
+
 
 class ComponentException(Exception):
     pass
@@ -57,6 +59,9 @@ class AbstractComponent(ABC):
     @abstractmethod
     def name(self):
         pass
+
+    def get_component_config_value(self, key):
+        return self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), key)
 
 
 __all__ = [ComponentException, AbstractComponent]
