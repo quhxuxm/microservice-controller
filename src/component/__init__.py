@@ -57,3 +57,6 @@ class AbstractComponent(ABC):
     @abstractmethod
     def name(self):
         pass
+
+
+__all__ = [ComponentException, AbstractComponent]
