@@ -4,6 +4,9 @@ from configparser import ConfigParser
 
 
 class Singleton:
+    """
+    The decoration used to make a class as singleton
+    """
     instances = {}
 
     def __init__(self, clazz):
@@ -19,6 +22,10 @@ class Singleton:
 
 @Singleton
 class ConfigurationHolder:
+    """
+    The configuration file holder
+    """
+
     def __init__(self, path):
         self.__config = ConfigParser()
         self.__config.read(path)
@@ -26,3 +33,6 @@ class ConfigurationHolder:
     @property
     def configuration(self):
         return self.__config
+
+
+__all__ = [Singleton, ConfigurationHolder]
