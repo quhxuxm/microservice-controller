@@ -7,17 +7,16 @@ class Singleton:
     """
     The decoration used to make a class as singleton
     """
-    instances = {}
 
     def __init__(self, clazz):
         self.__clazz = clazz
+        self.__instance = None
 
     def __call__(self, *args, **kwargs):
-        if self.__clazz in Singleton.instances:
-            return Singleton.instances[self.__clazz]
-        instance = self.__clazz(*args, **kwargs)
-        Singleton.instances[self.__clazz] = instance
-        return instance
+        if self.__instance is not None:
+            return self.__instance
+        self.__instance = self.__clazz(*args, **kwargs)
+        return self.__instance
 
 
 @Singleton
