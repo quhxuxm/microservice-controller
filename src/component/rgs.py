@@ -13,6 +13,9 @@ class Component(AbstractComponent):
     def build(self):
         print("Start to build RGS.")
 
+    def build_config(self):
+        print("Start to build RGS.")
+
     def config(self):
         print("Configuring RGS")
 

@@ -17,6 +17,9 @@ class Component(AbstractComponent):
     def build(self):
         pass
 
+    def build_config(self):
+        pass
+
     def config(self):
         pass
 

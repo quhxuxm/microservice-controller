@@ -3,7 +3,7 @@
 
 
 import importlib
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 
 import const
 from util import Singleton, ConfigurationHolder
@@ -13,20 +13,15 @@ class EngineException(Exception):
     pass
 
 
-class EngineExecutor:
-    def __init__(self, func):
-        self.__func = func
-        self.__process_pool = Pool(const.ENGINE_EXECUTOR_PROCESS_POOL_SIZE)
-
-    def __call__(self, *args):
-        self.__process_pool.map(self.__func, *args)
-
-
 @Singleton
 class Engine:
 
     def __init__(self):
+        self.__initialize_pool()
         self.__initialize_components()
+
+    def __initialize_pool(self):
+        self.__process_pool = ThreadPool(const.ENGINE_EXECUTOR_PROCESS_POOL_SIZE)
 
     def __initialize_components(self):
         self.__components = {}
@@ -35,41 +30,55 @@ class Engine:
             if not name.startswith(const.COMPONENT_MODULE_PACKAGE_NAME):
                 continue
             short_name = name[len(const.COMPONENT_MODULE_PACKAGE_NAME) + 1:]
-            component_module = importlib.import_module(name)
             try:
+                component_module = importlib.import_module(name)
                 component_instance = component_module.Component(configuration)
                 self.__components[short_name] = component_instance
-            except Exception as e:
+            except ModuleNotFoundError as e:
                 print(e)
 
     def __verify_component(self, name):
         if name not in self.__components:
             raise EngineException("The component [%s] not exist, fail to build." % name)
 
-    @EngineExecutor
+    def p4_fetch(self, name):
+        self.__verify_component(name)
+        self.__components[name].p4_fetch()
+
     def build(self, name):
-        self.__verify_component(name)
-        self.__components[name].build()
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].build()
 
-    @EngineExecutor
+        return self.__process_pool.apply_async(exec, [])
+
     def deploy(self, name):
-        self.__verify_component(name)
-        self.__components[name].deploy()
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].deploy()
 
-    @EngineExecutor
-    def config(self, name):
-        self.__verify_component(name)
-        self.__components[name].config()
+        return self.__process_pool.apply_async(exec, [])
 
-    @EngineExecutor
+    def build_config(self, name):
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].build_config()
+
+        return self.__process_pool.apply_async(exec, [])
+
     def start(self, name):
-        self.__verify_component(name)
-        self.__components[name].start()
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].start()
 
-    @EngineExecutor
+        return self.__process_pool.apply_async(exec, [])
+
     def stop(self, name):
-        self.__verify_component(name)
-        self.__components[name].stop()
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].stop()
+
+        return self.__process_pool.apply_async(exec, [])
 
     @property
     def components(self):

@@ -17,15 +17,16 @@ class AbstractComponent(ABC):
     def __init__(self, config):
         self.__config = config
 
-    def p4fetch(self):
+    def p4_fetch(self):
         p4 = P4()
         p4.user = self.__config.get("p4", "user")
         p4.password = self.__config.get("p4", "password")
         p4.port = "%s:%s" % (
-            self.__config.get("p4", "host"), self.__config.get("p4", "post"))
-        p4.client = self.__config[self.name, "p4.client.name"]
+            self.__config.get("p4", "host"), self.__config.get("p4", "port"))
+        p4.client = self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), "p4.client.name")
         # TODO if not exist create
         try:
+            print("Begin to sync component [%s] from p4 client [%s]" % (self.name, p4.client))
             p4.connect()
             p4.run_sync()
         except Exception as e:
@@ -37,6 +38,10 @@ class AbstractComponent(ABC):
 
     @abstractmethod
     def build(self):
+        pass
+
+    @abstractmethod
+    def build_config(self):
         pass
 
     @abstractmethod
