@@ -48,15 +48,21 @@ class Engine:
 
     def p4_fetch(self, name):
         def exec():
-            self.__verify_component(name)
-            self.__components[name].p4_fetch()
+            try:
+                self.__verify_component(name)
+                self.__components[name].p4_fetch()
+            except Exception as e:
+                print(e)
 
         return self.__process_pool.apply_async(exec, [])
 
     def build(self, name):
         def exec():
-            self.__verify_component(name)
-            self.__components[name].build()
+            try:
+                self.__verify_component(name)
+                self.__components[name].build()
+            except Exception as e:
+                print(e)
 
         return self.__process_pool.apply_async(exec, [])
 

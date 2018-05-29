@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
+import subprocess
+import sys
 from abc import ABC
 from abc import abstractmethod
 
@@ -37,9 +39,9 @@ class AbstractComponent(ABC):
     def info(self):
         pass
 
-    @abstractmethod
     def build(self):
-        pass
+        build_cmd = "%s %s" % (self.mvn_cmd_path, self.build_cmd)
+        subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir)
 
     @abstractmethod
     def build_config(self):
