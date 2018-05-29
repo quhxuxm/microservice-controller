@@ -40,8 +40,13 @@ class AbstractComponent(ABC):
         pass
 
     def build(self):
+        print("Begin to build component [%s]." % self.name)
         build_cmd = "%s %s" % (self.mvn_cmd_path, self.build_cmd)
-        subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir)
+        build_result = subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir)
+        if build_result and build_result.returncode == 0:
+            print("Success to build component [%s]." % self.name)
+            return
+        print("Fail to build component [%s]." % self.name)
 
     @abstractmethod
     def build_config(self):

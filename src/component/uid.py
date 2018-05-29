@@ -14,9 +14,6 @@ class Component(AbstractComponent):
     def name(self):
         return "uid"
 
-    def build(self):
-        pass
-
     def build_config(self):
         pass
 
