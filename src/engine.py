@@ -3,10 +3,11 @@
 
 
 import importlib
+from configparser import ConfigParser
 from multiprocessing.pool import ThreadPool
 
 import const
-from util import Singleton, ConfigurationHolder
+from util import Singleton
 
 
 class EngineException(Exception):
@@ -15,6 +16,9 @@ class EngineException(Exception):
 
 @Singleton
 class Engine:
+    """
+    The engine used to manage the flow of each step for the components
+    """
 
     def __init__(self):
         self.__initialize_pool()
@@ -25,7 +29,8 @@ class Engine:
 
     def __initialize_components(self):
         self.__components = {}
-        configuration = ConfigurationHolder(const.GLOBAL_CONFIG_FILE_PATH).configuration
+        configuration = ConfigParser()
+        configuration.read(const.GLOBAL_CONFIG_FILE_PATH)
         for name in configuration.sections():
             if not name.startswith(const.COMPONENT_MODULE_PACKAGE_NAME):
                 continue
@@ -42,8 +47,11 @@ class Engine:
             raise EngineException("The component [%s] not exist, fail to build." % name)
 
     def p4_fetch(self, name):
-        self.__verify_component(name)
-        self.__components[name].p4_fetch()
+        def exec():
+            self.__verify_component(name)
+            self.__components[name].p4_fetch()
+
+        return self.__process_pool.apply_async(exec, [])
 
     def build(self, name):
         def exec():

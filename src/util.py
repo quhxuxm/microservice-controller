@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from configparser import ConfigParser
 
 
 class Singleton:
@@ -17,21 +16,3 @@ class Singleton:
             return self.__instance
         self.__instance = self.__clazz(*args, **kwargs)
         return self.__instance
-
-
-@Singleton
-class ConfigurationHolder:
-    """
-    The configuration file holder
-    """
-
-    def __init__(self, path):
-        self.__config = ConfigParser()
-        self.__config.read(path)
-
-    @property
-    def configuration(self):
-        return self.__config
-
-
-__all__ = [Singleton, ConfigurationHolder]

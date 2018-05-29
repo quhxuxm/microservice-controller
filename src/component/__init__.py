@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 from abc import ABC
 from abc import abstractmethod
 
@@ -65,8 +66,25 @@ class AbstractComponent(ABC):
     def name(self):
         pass
 
-    def get_component_config_value(self, key):
+    def __get_component_config_value(self, key):
         return self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), key)
+
+    @property
+    def code_base_dir_path(self):
+        return os.path.join(os.path.abspath(self.__config.get("p4", "workspace.root.path")),
+                            self.__get_component_config_value("p4.client.name"))
+
+    @property
+    def build_dir(self):
+        return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.dir"))
+
+    @property
+    def mvn_cmd_path(self):
+        return self.__config.get("core", "maven.path")
+
+    @property
+    def build_cmd(self):
+        return self.__get_component_config_value("build.cmd")
 
 
 __all__ = [ComponentException, AbstractComponent]

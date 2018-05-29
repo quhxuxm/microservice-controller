@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import subprocess
+
 from component import AbstractComponent
 
 
@@ -11,7 +13,7 @@ class Component(AbstractComponent):
         pass
 
     def build(self):
-        print("Start to build RGS.")
+        subprocess.Popen("%s %s" % (self.mvn_cmd_path, self.build_cmd), cwd=self.build_dir)
 
     def build_config(self):
         print("Start to build RGS.")
