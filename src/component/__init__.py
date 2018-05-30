@@ -18,6 +18,7 @@ class DefaultComponent:
     def __init__(self, name, config):
         self.__config = config
         self.__name = name
+        self.__customized_action = []
 
     def p4_fetch(self):
         p4 = P4()
@@ -84,6 +85,10 @@ class DefaultComponent:
     @property
     def build_cmd(self):
         return self.__get_component_config_value("build.cmd")
+
+    @property
+    def customized_action(self):
+        return self.__customized_action
 
 
 __all__ = [ComponentException, DefaultComponent]
