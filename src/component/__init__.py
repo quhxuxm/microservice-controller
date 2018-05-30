@@ -3,8 +3,6 @@
 import os
 import subprocess
 import sys
-from abc import ABC
-from abc import abstractmethod
 
 from P4 import P4
 
@@ -15,10 +13,11 @@ class ComponentException(Exception):
     pass
 
 
-class AbstractComponent(ABC):
+class DefaultComponent:
 
-    def __init__(self, config):
+    def __init__(self, name, config):
         self.__config = config
+        self.__name = name
 
     def p4_fetch(self):
         p4 = P4()
@@ -35,7 +34,6 @@ class AbstractComponent(ABC):
         except Exception as e:
             print(e)
 
-    @abstractmethod
     def info(self):
         pass
 
@@ -48,30 +46,24 @@ class AbstractComponent(ABC):
             return
         print("Fail to build component [%s]." % self.name)
 
-    @abstractmethod
     def build_config(self):
         pass
 
-    @abstractmethod
     def config(self):
         pass
 
-    @abstractmethod
     def deploy(self):
         pass
 
-    @abstractmethod
     def start(self):
         pass
 
-    @abstractmethod
     def stop(self):
         pass
 
     @property
-    @abstractmethod
     def name(self):
-        pass
+        return self.__name
 
     def __get_component_config_value(self, key):
         return self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), key)
@@ -94,4 +86,4 @@ class AbstractComponent(ABC):
         return self.__get_component_config_value("build.cmd")
 
 
-__all__ = [ComponentException, AbstractComponent]
+__all__ = [ComponentException, DefaultComponent]

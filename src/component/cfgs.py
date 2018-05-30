@@ -1,18 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from src.component import AbstractComponent
+from component import DefaultComponent
 
 
-class Component(AbstractComponent):
+class Component(DefaultComponent):
     def info(self):
         pass
 
     def deploy(self):
         pass
-
-    @property
-    def name(self):
-        return "cfgs"
 
     def build_config(self):
         pass

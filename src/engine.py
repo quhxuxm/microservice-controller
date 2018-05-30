@@ -7,6 +7,7 @@ from configparser import ConfigParser
 from multiprocessing.pool import ThreadPool
 
 import const
+from component import DefaultComponent
 from util import Singleton
 
 
@@ -35,12 +36,18 @@ class Engine:
             if not name.startswith(const.COMPONENT_MODULE_PACKAGE_NAME):
                 continue
             short_name = name[len(const.COMPONENT_MODULE_PACKAGE_NAME) + 1:]
+            component_instance = None
             try:
                 component_module = importlib.import_module(name)
-                component_instance = component_module.Component(configuration)
-                self.__components[short_name] = component_instance
+                component_instance = component_module.Component(short_name, configuration)
             except ModuleNotFoundError as e:
                 print(e)
+            if component_instance is not None:
+                print("Success to find component module [%s]." % name)
+                self.__components[short_name] = component_instance
+            else:
+                print("Can not find component module [%s], the processo will use default one." % name)
+                self.__components[short_name] = DefaultComponent(short_name, configuration)
 
     def __verify_component(self, name):
         if name not in self.__components:

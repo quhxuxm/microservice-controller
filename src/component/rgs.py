@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from component import DefaultComponent
 
-from component import AbstractComponent
 
-
-class Component(AbstractComponent):
+class Component(DefaultComponent):
     def info(self):
         pass
 
@@ -22,7 +21,3 @@ class Component(AbstractComponent):
 
     def stop(self):
         print("Stoping RGS")
-
-    @property
-    def name(self):
-        return "rgs"
