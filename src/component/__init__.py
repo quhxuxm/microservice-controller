@@ -13,6 +13,15 @@ class ComponentException(Exception):
     pass
 
 
+def customized(func):
+    def exec(*args, **kwargs):
+        self = args[0]
+        self.customized_action.append(func.__name__)
+        func(*args, **kwargs)
+
+    return exec
+
+
 class DefaultComponent:
 
     def __init__(self, name, config):

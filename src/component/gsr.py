@@ -10,9 +10,6 @@ class Component(DefaultComponent):
     def deploy(self):
         pass
 
-    def build_config(self):
-        pass
-
     def config(self):
         pass
 
