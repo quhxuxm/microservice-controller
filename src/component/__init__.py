@@ -56,13 +56,19 @@ class DefaultComponent:
             return
         print("Fail to build component [%s]." % self.name)
 
-    def build_config(self):
+    def build_config_apache(self):
+        pass
+
+    def build_config_tomcat(self):
         pass
 
     def config(self):
         pass
 
-    def deploy(self):
+    def deploy_apache(self):
+        pass
+
+    def deploy_tomcat(self):
         pass
 
     def start(self):
