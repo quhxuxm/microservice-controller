@@ -4,7 +4,7 @@
 
 import importlib
 from configparser import ConfigParser
-from multiprocessing.pool import ThreadPool
+from concurrent.futures import ThreadPoolExecutor
 
 import const
 from component import DefaultComponent
@@ -26,7 +26,7 @@ class Engine:
         self.__initialize_components()
 
     def __initialize_pool(self):
-        self.__process_pool = ThreadPool(const.ENGINE_EXECUTOR_PROCESS_POOL_SIZE)
+        self.__process_pool = ThreadPoolExecutor(const.ENGINE_EXECUTOR_PROCESS_POOL_SIZE)
 
     def __initialize_components(self):
         self.__components = {}
@@ -61,7 +61,7 @@ class Engine:
             except Exception as e:
                 print(e)
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     def build(self, name):
         def exec():
@@ -71,35 +71,35 @@ class Engine:
             except Exception as e:
                 print(e)
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     def deploy(self, name):
         def exec():
             self.__verify_component(name)
             self.__components[name].deploy()
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     def build_config(self, name):
         def exec():
             self.__verify_component(name)
             self.__components[name].build_config()
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     def start(self, name):
         def exec():
             self.__verify_component(name)
             self.__components[name].start()
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     def stop(self, name):
         def exec():
             self.__verify_component(name)
             self.__components[name].stop()
 
-        return self.__process_pool.apply_async(exec, [])
+        return self.__process_pool.submit(exec)
 
     @property
     def components(self):
