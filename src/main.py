@@ -3,6 +3,10 @@
 
 
 from engine import Engine
+import  cmd
+class CmdEntry(cmd.Cmd):
+    def __init__(self):
+        super().__init__()
 
 if __name__ == "__main__":
     engine = Engine()
