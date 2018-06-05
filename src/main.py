@@ -29,4 +29,5 @@ if __name__ == "__main__":
         check_result(c_name, "build_config", build_config_result, final_status)
         build_result = engine.build(c_name)
         check_result(c_name, "build", build_result, final_status)
-    print("\n".join(["[%s] = [%s]" % (key, value) for key, value in final_status.items()]))
+    print("#" * 10 + "Result:" + "#" * 10)
+    print("\n".join(["[%s] = %s" % (key, value) for key, value in final_status.items()]))
