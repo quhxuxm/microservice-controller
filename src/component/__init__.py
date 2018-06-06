@@ -31,6 +31,7 @@ class DefaultComponent:
 
     def p4_fetch(self):
         p4 = P4()
+        p4.exception_level=1
         p4.user = self.__config.get("p4", "user")
         p4.password = self.__config.get("p4", "password")
         p4.port = "%s:%s" % (

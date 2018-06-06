@@ -5,10 +5,6 @@
 from time import sleep
 
 from engine import Engine
-import  cmd
-class CmdEntry(cmd.Cmd):
-    def __init__(self):
-        super().__init__()
 
 
 def check_result(component_name, action_name, future_obj, status):
