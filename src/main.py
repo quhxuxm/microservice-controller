@@ -3,8 +3,10 @@
 
 
 import logging
+from logging.config import fileConfig
 from time import sleep
 
+import const
 from engine import Engine
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ def check_result(component_name, action_name, future_obj, status):
 
 
 if __name__ == "__main__":
+    fileConfig(const.GLOBAL_CONFIG_FILE_PATH)
     engine = Engine()
     final_status = {}
     for c_name in engine.components.keys():
