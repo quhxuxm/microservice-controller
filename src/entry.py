@@ -14,3 +14,6 @@ class CmdLineEntry(Cmd):
 
     def do_deploy(self, *args):
         pass
+
+class WebEntry:
+    pass
