@@ -25,7 +25,7 @@ def check_result(component_name, action_name, future_obj, status):
 
 
 if __name__ == "__main__":
-    fileConfig(const.GLOBAL_CONFIG_FILE_PATH)
+    fileConfig(const.LOGGING_CONFIG_FILE_PATH)
     engine = Engine()
     final_status = {}
     for c_name in engine.components.keys():
