@@ -46,7 +46,7 @@ class DefaultComponent:
             p4.run_sync()
         except P4Exception:
             for e in p4.errors:
-                print(e)
+                DefaultComponent.__logger.error("Fail to sync component [%s] code." % self.name, e)
 
     def info(self):
         pass
@@ -70,6 +70,7 @@ class DefaultComponent:
         pass
 
     def deploy_apache(self):
+
         pass
 
     def deploy_tomcat(self):
@@ -96,6 +97,10 @@ class DefaultComponent:
     @property
     def build_dir(self):
         return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.dir"))
+
+    @property
+    def deploy_target_root_dir(self):
+        return self.__config.get("core", "deploy.target.dir.root")
 
     @property
     def mvn_cmd_path(self):
