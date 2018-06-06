@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 import os
 import subprocess
 import sys
 
-from P4 import P4
+from P4 import P4, P4Exception
 
 import const
 
@@ -23,6 +24,7 @@ def customized(func):
 
 
 class DefaultComponent:
+    __logger = logging.getLogger(__name__)
 
     def __init__(self, name, config):
         self.__config = config
@@ -31,7 +33,7 @@ class DefaultComponent:
 
     def p4_fetch(self):
         p4 = P4()
-        p4.exception_level=1
+        p4.exception_level = 1
         p4.user = self.__config.get("p4", "user")
         p4.password = self.__config.get("p4", "password")
         p4.port = "%s:%s" % (
@@ -39,23 +41,24 @@ class DefaultComponent:
         p4.client = self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), "p4.client.name")
         # TODO if not exist create
         try:
-            print("Begin to sync component [%s] from p4 client [%s]" % (self.name, p4.client))
+            DefaultComponent.__logger.info("Begin to sync component [%s] from p4 client [%s]" % (self.name, p4.client))
             p4.connect()
             p4.run_sync()
-        except Exception as e:
-            print(e)
+        except P4Exception:
+            for e in p4.errors:
+                print(e)
 
     def info(self):
         pass
 
     def build(self):
-        print("Begin to build component [%s]." % self.name)
+        DefaultComponent.__logger.info("Begin to build component [%s]." % self.name)
         build_cmd = "%s %s" % (self.mvn_cmd_path, self.build_cmd)
         build_result = subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir)
         if build_result and build_result.returncode == 0:
-            print("Success to build component [%s]." % self.name)
+            DefaultComponent.__logger.info("Success to build component [%s]." % self.name)
             return
-        print("Fail to build component [%s]." % self.name)
+        DefaultComponent.__logger.info("Fail to build component [%s]." % self.name)
 
     def build_config_apache(self):
         pass
