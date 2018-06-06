@@ -5,6 +5,7 @@
 import logging
 from logging.config import fileConfig
 from time import sleep
+import os
 
 import const
 from engine import Engine
@@ -25,6 +26,8 @@ def check_result(component_name, action_name, future_obj, status):
 
 
 if __name__ == "__main__":
+    if not os.path.isdir(const.LOGGING_LOG_FILE_DIR_PATH):
+        os.mkdir(const.LOGGING_LOG_FILE_DIR_PATH)
     fileConfig(const.LOGGING_CONFIG_FILE_PATH)
     engine = Engine()
     final_status = {}
