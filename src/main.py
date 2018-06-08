@@ -10,7 +10,7 @@ import os
 import const
 from engine import Engine
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("root")
 
 
 def check_result(component_name, action_name, future_obj, status):
