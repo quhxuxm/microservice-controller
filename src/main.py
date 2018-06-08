@@ -3,14 +3,23 @@
 
 
 import logging
+import os
 from logging.config import fileConfig
 from time import sleep
-import os
 
 import const
 from engine import Engine
 
-logger = logging.getLogger("root")
+
+def initialize_logging():
+    if not os.path.isdir(const.LOGGING_LOG_FILE_DIR_PATH):
+        os.mkdir(const.LOGGING_LOG_FILE_DIR_PATH)
+    fileConfig(const.LOGGING_CONFIG_FILE_PATH)
+
+
+initialize_logging()
+
+logger = logging.getLogger("root." + __name__)
 
 
 def check_result(component_name, action_name, future_obj, status):
@@ -26,16 +35,12 @@ def check_result(component_name, action_name, future_obj, status):
 
 
 if __name__ == "__main__":
-    if not os.path.isdir(const.LOGGING_LOG_FILE_DIR_PATH):
-        os.mkdir(const.LOGGING_LOG_FILE_DIR_PATH)
-    fileConfig(const.LOGGING_CONFIG_FILE_PATH)
+    logger.info("Begin to start Micro Service Controller ... ")
     engine = Engine()
     final_status = {}
     for c_name in engine.components.keys():
         fetch_result = engine.p4_fetch(c_name)
         check_result(c_name, "p4_fetch", fetch_result, final_status)
-        build_config_result = engine.build_config(c_name)
-        check_result(c_name, "build_config", build_config_result, final_status)
         build_result = engine.build(c_name)
         check_result(c_name, "build", build_result, final_status)
     logger.info("#" * 10 + "RESULT:" + "#" * 10)

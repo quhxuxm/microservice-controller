@@ -23,7 +23,7 @@ class Engine:
     """
 
     def __init__(self):
-        self.__logger = logging.getLogger(self.__class__.__name__)
+        self.__logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
         self.__initialize_pool()
         self.__initialize_components()
 
@@ -43,7 +43,7 @@ class Engine:
                 component_module = importlib.import_module(name)
                 component_instance = component_module.Component(short_name, configuration)
             except ModuleNotFoundError as e:
-                self.__logger.error("Can not found the module [%s]." % name, exc_info=e)
+                self.__logger.debug("Can not found the module [%s]." % name)
             if component_instance is not None:
                 self.__logger.info("Success to find component module [%s]." % name)
                 self.__components[short_name] = component_instance
@@ -82,16 +82,6 @@ class Engine:
                 self.__components[name].deploy()
             except Exception as e:
                 self.__logger.error("Fail to deploy the component [%s]." % name, exc_info=e)
-
-        return self.__process_pool.submit(exec)
-
-    def build_config(self, name):
-        def exec():
-            try:
-                self.__verify_component(name)
-                self.__components[name].build_config()
-            except Exception as  e:
-                self.__logger.error("Fail to configure the build code for component [%s]." % name, exc_info=e)
 
         return self.__process_pool.submit(exec)
 
