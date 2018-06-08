@@ -23,9 +23,6 @@ logger = logging.getLogger("root." + __name__)
 
 
 def check_result(component_name, action_name, future_obj, status):
-    while future_obj.running():
-        logger.info("[%s] is still working on [%s]." % (component_name, action_name))
-        sleep(2)
     component_exception = future_obj.exception()
     if component_exception is None:
         logger.info("Success to execute [%s] for [%s]" % (action_name, component_name))
