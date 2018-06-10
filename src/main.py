@@ -5,10 +5,9 @@
 import logging
 import os
 from logging.config import fileConfig
-from time import sleep
 
 import const
-from engine import Engine
+from entry import MainEntry
 
 
 def initialize_logging():
@@ -21,24 +20,6 @@ initialize_logging()
 
 logger = logging.getLogger("root." + __name__)
 
-
-def check_result(component_name, action_name, future_obj, status):
-    component_exception = future_obj.exception()
-    if component_exception is None:
-        logger.info("Success to execute [%s] for [%s]" % (action_name, component_name))
-        status["%s:%s" % (component_name, action_name)] = "[SUCCESS]"
-    else:
-        status["%s:%s" % (component_name, action_name)] = "[FAIL: %s]" % str(component_exception)
-
-
 if __name__ == "__main__":
-    logger.info("Begin to start Micro Service Controller ... ")
-    engine = Engine()
-    final_status = {}
-    for c_name in engine.components.keys():
-        fetch_result = engine.p4_fetch(c_name)
-        check_result(c_name, "p4_fetch", fetch_result, final_status)
-        build_result = engine.build(c_name)
-        check_result(c_name, "build", build_result, final_status)
-    logger.info("#" * 10 + "RESULT:" + "#" * 10)
-    logger.info("\n".join(["[%s] = %s" % (key, value) for key, value in final_status.items()]))
+    main_entry = MainEntry()
+    main_entry.cmdloop("Begin to start Micro Service Controller ...")
