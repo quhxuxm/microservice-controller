@@ -110,8 +110,8 @@ class DefaultComponent:
                     output_file_name = file_name[0: file_name.find(".tmpl")]
                     tmpl_file_absolute_path = os.path.join(dir_root_path, file_name)
                     output_file_absolute_path = os.path.join(dir_root_path, output_file_name)
-                    with open(tmpl_file_absolute_path, "r") as tmpl_file:
-                        with open(output_file_absolute_path, "w") as output_file:
+                    with open(tmpl_file_absolute_path, mode="r", encoding="utf-8") as tmpl_file:
+                        with open(output_file_absolute_path, mode="w", encoding="utf-8") as output_file:
                             for line in tmpl_file:
                                 replaced_line = line
                                 for k, v in self.tokens.items():
