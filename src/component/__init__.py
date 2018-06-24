@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import sys
+from configparser import ConfigParser, NoOptionError
 from zipfile import ZipFile
 
 from P4 import P4, P4Exception
@@ -31,6 +32,19 @@ class DefaultComponent:
         self.__config = config
         self.__name = name
         self.__customized_action = []
+        self.__tokens = {}
+        self.__init_tokens()
+
+    def __init_tokens(self):
+        if self.__get_component_config_value("token.file") is None:
+            return
+        token_resource_dir_path = os.path.join(self.resources_dir_path, self.__config.get("core", "resources.token"))
+        token_resource_file_path = os.path.join(token_resource_dir_path,
+                                                self.__get_component_config_value("token.file"))
+        token_file_config_parser = ConfigParser()
+        token_file_config_parser.read(token_resource_file_path)
+        for k, v in token_file_config_parser.items("DEFAULT"):
+            self.__tokens[k] = v
 
     def p4_fetch(self):
         p4 = P4()
@@ -68,18 +82,15 @@ class DefaultComponent:
 
     @staticmethod
     def __extract_zip(resource_path, target_path):
-        logging.info("Try to extract apache to [%s]" % str(target_path))
-        if not os.path.isdir(target_path):
-            logging.info("Begin to extract apache to [%s]" % str(target_path))
-            resource_zip_file = ZipFile(resource_path)
-            resource_zip_file.extractall(target_path)
-            logging.info("Success to extract apache to [%s]" % str(target_path))
-            return
-        logging.info("[%s] exist already, no need to extract" % str(target_path))
+        logging.info("Begin to extract apache to [%s]" % str(target_path))
+        resource_zip_file = ZipFile(resource_path)
+        resource_zip_file.extractall(target_path)
+        logging.info("Success to extract apache to [%s]" % str(target_path))
+        return
 
     def deploy(self):
         self.__extract_zip(self.build_result_path, self.deploy_target_path)
-        self.replace_token()
+        self._replace_token()
 
     def config(self):
         pass
@@ -90,12 +101,31 @@ class DefaultComponent:
     def stop(self):
         pass
 
-    def replace_token(self):
-        self.deploy_target_path
-        pass
+    def _replace_token(self):
+        for dir_root_path, sub_dir_names, file_names in os.walk(self.deploy_target_path):
+            if not file_names:
+                continue
+            for file_name in file_names:
+                if file_name.endswith(".tmpl"):
+                    output_file_name = file_name[0: file_name.find(".tmpl")]
+                    tmpl_file_absolute_path = os.path.join(dir_root_path, file_name)
+                    output_file_absolute_path = os.path.join(dir_root_path, output_file_name)
+                    with open(tmpl_file_absolute_path, "r") as tmpl_file:
+                        with open(output_file_absolute_path, "w") as output_file:
+                            for line in tmpl_file:
+                                replaced_line = line
+                                for k, v in self.tokens.items():
+                                    replaced_line = replaced_line.replace("@" + k.upper() + "@", v)
+                                output_file.write(replaced_line)
 
     def __get_component_config_value(self, key):
-        return self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), key)
+        section_name = "%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name)
+        if not self.__config.has_section(section_name):
+            return None
+        try:
+            return self.__config.get(section_name, key)
+        except NoOptionError:
+            return None
 
     @property
     def p4user(self):
@@ -124,8 +154,12 @@ class DefaultComponent:
                             self.__get_component_config_value("p4.client.name"))
 
     @property
+    def resources_dir_path(self):
+        return os.path.abspath("resources")
+
+    @property
     def tomcat_zip_path(self):
-        tomcat_zip_file_path = os.path.join(self.__config.get("core", "resources.tomcat"))
+        tomcat_zip_file_path = os.path.join(self.resources_dir_path, self.__config.get("core", "resources.tomcat"))
         return tomcat_zip_file_path
 
     @property
@@ -136,7 +170,7 @@ class DefaultComponent:
 
     @property
     def apache_zip_path(self):
-        apache_zip_file_path = os.path.join(self.__config.get("core", "resources.apache"))
+        apache_zip_file_path = os.path.join(self.resources_dir_path, self.__config.get("core", "resources.apache"))
         return apache_zip_file_path
 
     @property
@@ -183,6 +217,10 @@ class DefaultComponent:
     @property
     def customized_action(self):
         return self.__customized_action
+
+    @property
+    def tokens(self):
+        return self.__tokens
 
 
 __all__ = [ComponentException, DefaultComponent]

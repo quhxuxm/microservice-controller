@@ -8,7 +8,7 @@ class Component(DefaultComponent):
         pass
 
     def deploy(self):
-        pass
+        super().deploy()
 
     def build_config(self):
         print("Start to build RGS.")
