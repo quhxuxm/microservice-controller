@@ -21,3 +21,7 @@ class Component(DefaultComponent):
 
     def stop(self):
         pass
+
+    def deploy_apache(self):
+        # No need to deploy apache for NSS
+        pass

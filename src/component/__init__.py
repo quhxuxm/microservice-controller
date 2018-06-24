@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import sys
+from zipfile import ZipFile
 
 from P4 import P4, P4Exception
 
@@ -34,11 +35,10 @@ class DefaultComponent:
     def p4_fetch(self):
         p4 = P4()
         p4.exception_level = 1
-        p4.user = self.__config.get("p4", "user")
-        p4.password = self.__config.get("p4", "password")
-        p4.port = "%s:%s" % (
-            self.__config.get("p4", "host"), self.__config.get("p4", "port"))
-        p4.client = self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), "p4.client.name")
+        p4.user = self.p4user
+        p4.password = self.p4password
+        p4.port = self.p4port
+        p4.client = self.p4client
         # TODO if not exist create
         try:
             DefaultComponent.__logger.info("Begin to sync component [%s] from p4 client [%s]" % (self.name, p4.client))
@@ -54,26 +54,34 @@ class DefaultComponent:
     def build(self):
         DefaultComponent.__logger.info("Begin to build component [%s]." % self.name)
         build_cmd = "%s %s" % (self.mvn_cmd_path, self.build_cmd)
-        build_result = subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir)
+        build_result = subprocess.run(build_cmd, stdout=sys.stdout, cwd=self.build_dir_path)
         if build_result and build_result.returncode == 0:
             DefaultComponent.__logger.info("Success to build component [%s]." % self.name)
             return
         DefaultComponent.__logger.info("Fail to build component [%s]." % self.name)
 
-    def build_config_apache(self):
-        pass
-
-    def build_config_tomcat(self):
-        pass
-
-    def config(self):
-        pass
-
     def deploy_apache(self):
-
-        pass
+        DefaultComponent.__extract_zip(self.apache_zip_path, self.apache_deploy_path)
 
     def deploy_tomcat(self):
+        DefaultComponent.__extract_zip(self.tomcat_zip_path, self.tomcat_deploy_path)
+
+    @staticmethod
+    def __extract_zip(resource_path, target_path):
+        logging.info("Try to extract apache to [%s]" % str(target_path))
+        if not os.path.isdir(target_path):
+            logging.info("Begin to extract apache to [%s]" % str(target_path))
+            resource_zip_file = ZipFile(resource_path)
+            resource_zip_file.extractall(target_path)
+            logging.info("Success to extract apache to [%s]" % str(target_path))
+            return
+        logging.info("[%s] exist already, no need to extract" % str(target_path))
+
+    def deploy(self):
+        self.__extract_zip(self.build_result_path, self.deploy_target_path)
+        self.replace_token()
+
+    def config(self):
         pass
 
     def start(self):
@@ -82,12 +90,33 @@ class DefaultComponent:
     def stop(self):
         pass
 
-    @property
-    def name(self):
-        return self.__name
+    def replace_token(self):
+        self.deploy_target_path
+        pass
 
     def __get_component_config_value(self, key):
         return self.__config.get("%s.%s" % (const.COMPONENT_MODULE_PACKAGE_NAME, self.name), key)
+
+    @property
+    def p4user(self):
+        return self.__config.get("p4", "user")
+
+    @property
+    def p4password(self):
+        return self.__config.get("p4", "password")
+
+    @property
+    def p4port(self):
+        return "%s:%s" % (
+            self.__config.get("p4", "host"), self.__config.get("p4", "port"))
+
+    @property
+    def p4client(self):
+        return self.__get_component_config_value("p4.client.name")
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def code_base_dir_path(self):
@@ -95,20 +124,61 @@ class DefaultComponent:
                             self.__get_component_config_value("p4.client.name"))
 
     @property
-    def build_dir(self):
+    def tomcat_zip_path(self):
+        tomcat_zip_file_path = os.path.join(self.__config.get("core", "resources.tomcat"))
+        return tomcat_zip_file_path
+
+    @property
+    def tomcat_deploy_path(self):
+        tomcat_deploy_path = os.path.join(self.__config.get("core", "deploy.target.dir.root"),
+                                          self.__config.get("core", "deploy.target.dir.relative.tomcat"))
+        return tomcat_deploy_path
+
+    @property
+    def apache_zip_path(self):
+        apache_zip_file_path = os.path.join(self.__config.get("core", "resources.apache"))
+        return apache_zip_file_path
+
+    @property
+    def apache_deploy_path(self):
+        apache_deploy_path = os.path.join(self.__config.get("core", "deploy.target.dir.root"),
+                                          self.__config.get("core", "deploy.target.dir.relative.apache"))
+        return apache_deploy_path
+
+    @property
+    def build_dir_path(self):
         return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.dir"))
 
     @property
-    def deploy_target_root_dir(self):
-        return self.__config.get("core", "deploy.target.dir.root")
+    def build_result_path(self):
+        return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.result"))
+
+    @property
+    def deploy_target_root_dir_path(self):
+        return os.path.abspath(self.__config.get("core", "deploy.target.dir.root"))
+
+    @property
+    def deploy_target_root_components_dir_path(self):
+        return os.path.join(self.deploy_target_root_dir_path,
+                            self.__config.get("core", "deploy.target.dir.relative.components"))
 
     @property
     def mvn_cmd_path(self):
-        return self.__config.get("core", "maven.path")
+        return os.path.abspath(self.__config.get("core", "maven.path"))
 
     @property
     def build_cmd(self):
         return self.__get_component_config_value("build.cmd")
+
+    @property
+    def deploy_target_path(self):
+        deploy_relative_path = self.__get_component_config_value(
+            "deploy.target.dir")
+        if deploy_relative_path is None:
+            deploy_relative_path = self.name
+        deploy_path = os.path.join(self.deploy_target_root_components_dir_path,
+                                   deploy_relative_path)
+        return deploy_path
 
     @property
     def customized_action(self):

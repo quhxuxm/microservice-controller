@@ -25,9 +25,6 @@ class MainEntry(Cmd):
     def do_web(self, arg):
         print("Starting the web entry")
 
-    def do_help(self, arg):
-        pass
-
     def do_p4fetch(self, component_name):
         action_name = self.do_p4fetch.__name__
         engine = Engine()
@@ -58,8 +55,20 @@ class MainEntry(Cmd):
             self.__check_result(c_name, action_name, build_result)
         self.__print_final_status()
 
-    def do_deploy(self, *args):
-        pass
+    def do_deploy(self, component_name):
+        action_name = self.do_deploy.__name__
+        engine = Engine()
+        if component_name is not None and len(component_name.strip()) > 0:
+            logger.info("Build source code for component [%s]" % component_name)
+            build_result = engine.deploy(component_name)
+            self.__check_result(component_name, action_name, build_result)
+            self.__print_final_status()
+            return
+        for c_name in engine.components.keys():
+            logger.info("Build source code for component [%s]" % c_name)
+            build_result = engine.deploy(c_name)
+            self.__check_result(c_name, action_name, build_result)
+        self.__print_final_status()
 
     def __print_final_status(self):
         logger.info("\n".join(["[%s] = %s" % (key, value) for key, value in self.final_status.items()]))

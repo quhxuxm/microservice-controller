@@ -48,7 +48,8 @@ class Engine:
                 self.__logger.info("Success to find component module [%s]." % name)
                 self.__components[short_name] = component_instance
             else:
-                self.__logger.info("Can not find component module [%s], the processo will use default one." % name)
+                self.__logger.info(
+                    "Can not find component module [%s], initialize component with default implementation." % name)
                 self.__components[short_name] = DefaultComponent(short_name, configuration)
 
     def __verify_component(self, name):
@@ -79,6 +80,8 @@ class Engine:
         def exec():
             try:
                 self.__verify_component(name)
+                self.__components[name].deploy_apache()
+                self.__components[name].deploy_tomcat()
                 self.__components[name].deploy()
             except Exception as e:
                 self.__logger.error("Fail to deploy the component [%s]." % name, exc_info=e)
