@@ -7,9 +7,6 @@ class Component(DefaultComponent):
     def info(self):
         pass
 
-    def deploy(self):
-        pass
-
     def config(self):
         pass
 
@@ -18,3 +15,6 @@ class Component(DefaultComponent):
 
     def stop(self):
         pass
+
+    def deploy(self):
+        super().deploy()

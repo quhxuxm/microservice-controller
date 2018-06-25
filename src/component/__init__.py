@@ -89,7 +89,10 @@ class DefaultComponent:
         return
 
     def deploy(self):
-        self.__extract_zip(self.build_result_path, self.deploy_target_path)
+        for one_result_path in self.build_result_paths:
+            if not os.path.exists(one_result_path):
+                continue
+            self.__extract_zip(one_result_path, self.deploy_target_path)
         self._replace_token()
 
     def config(self):
@@ -184,8 +187,12 @@ class DefaultComponent:
         return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.dir"))
 
     @property
-    def build_result_path(self):
-        return os.path.join(self.code_base_dir_path, self.__get_component_config_value("build.result"))
+    def build_result_paths(self):
+        build_results = self.__get_component_config_value("build.result")
+        if build_results is None:
+            return []
+        build_result_list = build_results.split(",")
+        return [os.path.join(self.code_base_dir_path, one_result) for one_result in build_result_list]
 
     @property
     def deploy_target_root_dir_path(self):

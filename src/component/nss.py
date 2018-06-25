@@ -7,9 +7,6 @@ class Component(DefaultComponent):
     def info(self):
         pass
 
-    def deploy(self):
-        pass
-
     def build_config(self):
         pass
 
@@ -25,3 +22,6 @@ class Component(DefaultComponent):
     def deploy_apache(self):
         # No need to deploy apache for NSS
         pass
+
+    def deploy(self):
+        super().deploy()
